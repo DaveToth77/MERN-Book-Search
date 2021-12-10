@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Button, Alert } from "react-bootstrap";
 
 // import { createUser } from '../utils/API';
@@ -21,6 +21,14 @@ const SignupForm = () => {
   // useMutation for ADD_USER
   const [addUser, { error }] = useMutation(ADD_USER);
 
+  useEffect(() => {
+    if (error) {
+      setShowAlert(true);
+    } else {
+      setShowAlert(false);
+    }
+  }, [error]);
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setUserFormData({ ...userFormData, [name]: value });
@@ -41,6 +49,11 @@ const SignupForm = () => {
         variables: { ...userFormData },
       });
 
+      if (error) {
+        throw new Error("something went wrong!");
+      }
+
+      console.log(data.user);
       Auth.login(data.addUser.token);
     } catch (err) {
       console.error(err);
@@ -53,7 +66,7 @@ const SignupForm = () => {
       password: "",
     });
   };
-
+  
   return (
     <>
       {/* This is needed for the validation functionality above */}
