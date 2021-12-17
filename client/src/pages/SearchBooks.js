@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Jumbotron,
   Container,
@@ -6,15 +6,16 @@ import {
   Form,
   Button,
   Card,
-  CardColumns
-} from 'react-bootstrap';
+  CardColumns,
+} from "react-bootstrap";
 
-import { SAVE_BOOK } from '../utils/mutations';
-import { useMutation } from '@apollo/client'
+import Auth from "../utils/auth";
+import { searchGoogleBooks } from "../utils/API";
+import { saveBookIds, getSavedBookIds } from "../utils/localStorage";
 
-import Auth from '../utils/auth';
-import { searchGoogleBooks } from '../utils/API';
-import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
+// Imports the useMutation hook and the SAVE_BOOK mutation
+import { useMutation } from "@apollo/client";
+import { SAVE_BOOK } from "../utils/mutations";
 
 const SearchBooks = () => {
   // create state for holding returned google api data
@@ -25,17 +26,14 @@ const SearchBooks = () => {
   // create state to hold saved bookId values
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
 
+  // Uses the SAVE_BOOK mutation to save to book data to the ApolloServer
+  const [saveBook, { error }] = useMutation(SAVE_BOOK);
+
   // set up useEffect hook to save `savedBookIds` list to localStorage on component unmount
   // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
   useEffect(() => {
-    // let isMounted = true; // note this flag denote mount status
-    return () => {
-      saveBookIds(savedBookIds);
-      // isMounted = false;
-    };
+    return () => saveBookIds(savedBookIds);
   });
-
-  const [saveBook, { error }] = useMutation(SAVE_BOOK);
 
   // create method to search for books and set state on form submit
   const handleFormSubmit = async (event) => {
@@ -82,10 +80,8 @@ const SearchBooks = () => {
     }
 
     try {
-      //save book mutation
-      await saveBook({
-        variables:bookToSave
-      });
+      // saveBook mutation
+      await saveBook({ variables: bookToSave });
 
       // if book successfully saves to user's account, save book id to state
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
@@ -93,12 +89,13 @@ const SearchBooks = () => {
       console.error(err);
     }
   };
-  
+
   return (
     <>
       <Jumbotron fluid className="text-light bg-dark">
         <Container>
           <h1>Search for Books!</h1>
+          {error ? `There is an error with Apollo Client ${error}!` : null}
           <Form onSubmit={handleFormSubmit}>
             <Form.Row>
               <Col xs={12} md={8}>

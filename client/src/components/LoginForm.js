@@ -1,20 +1,19 @@
 // see SignupForm.js for comments
-import React, { useState } from 'react';
-import { Form, Button, Alert } from 'react-bootstrap';
-
-// import { loginUser } from '../utils/API';
-import Auth from '../utils/auth';
-import { useMutation } from '@apollo/client';
-import { LOGIN_USER } from '../utils/mutations';
+import React, { useState } from "react";
+import { Form, Button, Alert } from "react-bootstrap";
+// Imports the useMutation hook from the @apollo-client so that mutations can be called
+import { useMutation } from "@apollo/client";
+// Imports the LOGIN_USER mutation from the mutations.js file in the client side utils folder
+import { LOGIN_USER } from "../utils/mutations";
+import Auth from "../utils/auth";
 
 const LoginForm = () => {
-  const [userFormData, setUserFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const [userFormData, setUserFormData] = useState({ email: "", password: "" });
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
-  const [login, { error }] = useMutation(LOGIN_USER);
+
+  // Assigns the LOGIN_USER mutation to the loginUser function and brings in the ability to error report
+  const [loginUser, { error }] = useMutation(LOGIN_USER);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -32,23 +31,15 @@ const LoginForm = () => {
     }
 
     try {
-      // Pass the data from User into the login function and assign the response to the variable useFormData
-      const { data } = await login({
-        variables: { ...userFormData },
-      });
+      // Passes the data supplied by the user into the loginUser function and assigns the response to the variable data
+      const { data } = await loginUser({ variables: { ...userFormData } });
 
-      if (error) {
-        throw new Error("something went wrong!");
-      }
-
-      // console.log(data.user);
-      //Use token assigned to User to log in
+      // Use the token assigned to the user to log the user in
       Auth.login(data.login.token);
 
       if (error) {
         console.log(error.message);
       }
-      
     } catch (err) {
       console.error(err);
       setShowAlert(true);
@@ -65,41 +56,47 @@ const LoginForm = () => {
     <>
       <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
         <Alert
-        dismissible
-        onClose={() => setShowAlert(false)}
-        show={showAlert}
-        variant='danger'>
+          dismissible
+          onClose={() => setShowAlert(false)}
+          show={showAlert}
+          variant="danger"
+        >
           Something went wrong with your login credentials!
         </Alert>
         <Form.Group>
-          <Form.Label htmlFor='email'>Email</Form.Label>
+          <Form.Label htmlFor="email">Email</Form.Label>
           <Form.Control
-            type='text'
-            placeholder='Your email'
-            name='email'
+            type="text"
+            placeholder="Your email"
+            name="email"
             onChange={handleInputChange}
             value={userFormData.email}
             required
           />
-          <Form.Control.Feedback type='invalid'>Email is required!</Form.Control.Feedback>
+          <Form.Control.Feedback type="invalid">
+            Email is required!
+          </Form.Control.Feedback>
         </Form.Group>
 
         <Form.Group>
-          <Form.Label htmlFor='password'>Password</Form.Label>
+          <Form.Label htmlFor="password">Password</Form.Label>
           <Form.Control
-            type='password'
-            placeholder='Your password'
-            name='password'
+            type="password"
+            placeholder="Your password"
+            name="password"
             onChange={handleInputChange}
             value={userFormData.password}
             required
           />
-          <Form.Control.Feedback type='invalid'>Password is required!</Form.Control.Feedback>
+          <Form.Control.Feedback type="invalid">
+            Password is required!
+          </Form.Control.Feedback>
         </Form.Group>
         <Button
           disabled={!(userFormData.email && userFormData.password)}
-          type='submit'
-          variant='success'>
+          type="submit"
+          variant="success"
+        >
           Submit
         </Button>
       </Form>
